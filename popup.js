@@ -1,8 +1,15 @@
 var distanceInput, rearrangeButton
 
-function element(e) {
+function element(e, a) {
   const d = document.createElement(e)
-  for (let i = 1; i< arguments.length; i++) {
+  let i = 1
+  if (a && typeof a == 'object' && !(a instanceof Node)) {
+    for (attr in a) {
+      d.setAttribute(attr, a[attr])
+    }
+    i++
+  }
+  for (; i < arguments.length; i++) {
     const c = arguments[i]
     if (typeof c == 'string') {
       d.appendChild(document.createTextNode(c))
@@ -63,20 +70,18 @@ function renderPannerRegistry() {
     while (audioSources.firstChild) {
       audioSources.removeChild(audioSources.lastChild)
     }
-    const sourceTable = table(
+    const sourceTable = table({width: '200px'},
         tr(th('Name'), th('x'), th('z'), th('y'))
     )
-    sourceTable.width = '200px'
-    sourceTable.inner
     for (let i = 0; i < pannerRegistry.length; i++) {
       const { panner, element } = pannerRegistry[i];
 
       sourceTable.appendChild(
         tr(
-          b(`Panner #${i}`),
-          td(panner.x.toFixed(2)),
-          td(panner.z.toFixed(2)),
-          td(panner.y.toFixed(2))
+          b({title: element}, `Panner #${i}`),
+          td(panner.x.toPrecision(2)),
+          td(panner.z.toPrecision(2)),
+          td(panner.y.toPrecision(2))
         ))
         
     }

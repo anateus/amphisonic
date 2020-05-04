@@ -5,9 +5,9 @@ function getPannerForElement(audioContext, element) {
   var panner = audioContext.createPanner()
   var listener = audioContext.listener
   panner.panningModel = 'HRTF'
-  panner.distanceModel = 'inverse'
+  panner.distanceModel = 'exponential'
   panner.refDistance = 1
-  panner.maxDistance = 3000
+  panner.maxDistance = 100
   panner.rolloffFactor = 1
 
   listener.forwardX.setValueAtTime(0, audioContext.currentTime)
@@ -22,13 +22,24 @@ function getPannerForElement(audioContext, element) {
   return panner
 }
 
+function normalize_range(input, inputMin, inputMax, outputMin, outputMax) {
+  const percent = (input - inputMin) / (inputMax - inputMin)
+  return percent * (outputMax - outputMin) + outputMin
+}
+
+// TODO: Make this adjustable in the UI
+const narrowFactor = 0.15
+
 function arrangeSourcesInSemiCircle(sources, distance = 3) {
   console.log("Rearranging sources to distance:", distance)
+  let p, t, n
   if (sources.length > 1) {
     for (var i = 0; i < sources.length; i++) {
-      let p = sources[i].panner
-      p.positionZ.value = sources.length < 3 ? distance * 0.15 : parseFloat((-1 * Math.sin(Math.PI * i / (sources.length - 1))).toFixed(2)) * distance
-      p.positionX.value = parseFloat((Math.cos(Math.PI * i / (sources.length < 3 ? 3 : sources.length - 1))).toFixed(2)) * distance
+      p = sources[i].panner
+      n = sources.length < 3 ? 0.5 : narrowFactor
+      t = normalize_range(i, 0, sources.length - 1, 0 + n, Math.PI - n)
+      p.positionZ.value = parseFloat((-1 * Math.sin(t)).toFixed(2)) * distance
+      p.positionX.value = parseFloat((Math.cos(t)).toFixed(2)) * distance
       p.positionY.value = Math.random() * 2 // jitter the heights a little bit.
       console.log(`Setting Panner #${i} to \nx: ${p.positionX.value}, z: ${p.positionZ.value}, y: ${p.positionY.value}`)
     }
@@ -55,6 +66,10 @@ document.addEventListener('play', function (event) {
   const element = event.target
   if (!audioContext) {
     audioContext = new AudioContext()
+  }
+  // Ignore the self-video element in Online Town.
+  if (element.id == 'self-video') {
+    return
   }
   try {
     pannerRegistry.push({ 'element': element, 'panner': getPannerForElement(audioContext, element) })
