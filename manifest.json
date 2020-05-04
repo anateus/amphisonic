@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Amphisonic",
+  "version": "1.0",
+  "description": "Surround yourself with the page's audio streams. Icon made by Freepik on www.flaticon.com.",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": "amphitheatre.png"
+  }
+}
