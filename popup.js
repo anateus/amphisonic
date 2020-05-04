@@ -1,5 +1,26 @@
 var distanceInput, rearrangeButton
 
+function element(e) {
+  const d = document.createElement(e)
+  for (let i = 1; i< arguments.length; i++) {
+    const c = arguments[i]
+    if (typeof c == 'string') {
+      d.appendChild(document.createTextNode(c))
+    } else {
+      d.appendChild(c)
+    }
+  }
+  return d
+}
+
+function div() { return element('div', ...arguments) }
+
+function b() { return element('b', ...arguments) }
+function table() { return element('table', ...arguments) }
+function tr() { return element('tr', ...arguments) }
+function th() { return element('th', ...arguments) }
+function td() { return element('td', ...arguments) }
+
 document.addEventListener("DOMContentLoaded", function () { 
   renderPannerRegistry()
 
@@ -29,20 +50,37 @@ function rearrangeAudioSources() {
   })
 }
 
+// chrome.runtime.onMessage.addListener(function (request, sender) {
+//   if (request.message == 'arrangementUpdated') {
+//     renderPannerRegistry();
+//   }
+// }
+
 function renderPannerRegistry() {
   chrome.storage.sync.get('pannerRegistry', function (result) {
     const pannerRegistry = result.pannerRegistry
-    console.log(pannerRegistry);
     const audioSources = document.getElementById('audioSources')
     while (audioSources.firstChild) {
       audioSources.removeChild(audioSources.lastChild)
     }
+    const sourceTable = table(
+        tr(th('Name'), th('x'), th('z'), th('y'))
+    )
+    sourceTable.width = '200px'
+    sourceTable.inner
     for (let i = 0; i < pannerRegistry.length; i++) {
       const { panner, element } = pannerRegistry[i];
-      const source = document.createElement('div')
-      source.textContent = `Panner #${i} ${element} x: ${panner.x}, z: ${panner.z}, y: ${panner.y}`
-      audioSources.appendChild(source)
+
+      sourceTable.appendChild(
+        tr(
+          b(`Panner #${i}`),
+          td(panner.x.toFixed(2)),
+          td(panner.z.toFixed(2)),
+          td(panner.y.toFixed(2))
+        ))
+        
     }
+    audioSources.appendChild(sourceTable)
   })
 }
 

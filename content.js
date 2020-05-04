@@ -28,15 +28,18 @@ function arrangeSourcesInSemiCircle(sources, distance = 3) {
     for (var i = 0; i < sources.length; i++) {
       let p = sources[i].panner
       p.positionZ.value = sources.length < 3 ? distance * 0.15 : parseFloat((-1 * Math.sin(Math.PI * i / (sources.length - 1))).toFixed(2)) * distance
-      p.positionX.value = parseFloat((Math.cos(Math.PI * i / (sources.length - 1))).toFixed(2)) * distance
+      p.positionX.value = parseFloat((Math.cos(Math.PI * i / (sources.length < 3 ? 3 : sources.length - 1))).toFixed(2)) * distance
       p.positionY.value = Math.random() * 2 // jitter the heights a little bit.
       console.log(`Setting Panner #${i} to \nx: ${p.positionX.value}, z: ${p.positionZ.value}, y: ${p.positionY.value}`)
     }
   }
+  // Store updated panners.
+  chrome.storage.sync.set({'pannerRegistry': serializePannerRegistry()})
 }
 
 var audioContext
 const pannerRegistry = []
+chrome.storage.sync.set({'pannerRegistry': serializePannerRegistry()})
 
 function serializePannerRegistry() {
   const serialized = []
