@@ -4,7 +4,7 @@ function element(e, a) {
   const d = document.createElement(e)
   let i = 1
   if (a && typeof a == 'object' && !(a instanceof Node)) {
-    for (attr in a) {
+    for (let attr in a) {
       d.setAttribute(attr, a[attr])
     }
     i++
